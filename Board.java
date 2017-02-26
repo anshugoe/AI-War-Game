@@ -11,10 +11,14 @@ public class Board {
     private PieceColor[][] pieces; //colors of pieces currently on board; indexed by [y][x]
     private int blueScore;
     private int greenScore;
+    private int emptySpaces;
 
+    //Constructor which allows values to be set
+    //Sets all pieces to BLANK for a new game
     public Board(int[][] boardVals) {
         blueScore = 0;
         greenScore = 0;
+        emptySpaces = 0;
 
         //copy board vals argument into board vals class field
         this.boardVals = new int[boardVals.length][boardVals[0].length];
@@ -29,13 +33,17 @@ public class Board {
         for (int i = 0; i < pieces.length; i++) {
             for (int j = 0; j < pieces[i].length; j++) {
                 pieces[i][j] = PieceColor.BLANK;
+                emptySpaces++;
             }
         }
     }
 
+    //Constructor which allows both values and current piece locations
+    //to be assigned
     public Board(int[][] boardVals, PieceColor[][] pieces) {
         blueScore = 0;
         greenScore = 0;
+        emptySpaces = 0;
 
         //copy board vals argument into boardVals class field
         this.boardVals = new int[boardVals.length][boardVals[0].length];
@@ -52,16 +60,24 @@ public class Board {
                 this.pieces[i][j] = pieces[i][j];
                 if (pieces[i][j] == PieceColor.BLUE)
                     blueScore += boardVals[i][j];
-                if (pieces[i][j] == PieceColor.GREEN)
+                else if (pieces[i][j] == PieceColor.GREEN)
                     greenScore += boardVals[i][j];
+                else
+                    emptySpaces++;
             }
         }
     }
     
+    //Creates a copy of this board.
+    //Changing the values in the copied board will not affect
+    //the objects in this board.
     public Board copy() {
         return new Board(boardVals, pieces);
     }
 
+    //Gets a list of moves that can possibly be made on this board
+    //by the player of the specified color.
+    //if this returns an empty list, then the game has already ended.
     public LinkedList<Move> getPossibleMoves(PieceColor playerColor) {
         LinkedList<Move> moves = new LinkedList<Move>();
         for (int i = 0; i < pieces.length; i++) {
@@ -75,7 +91,12 @@ public class Board {
         return moves;
     }
 
-    public void makeMove(Move move) {
+    //Performs the actual action of making the specified move on this board.
+    //This board will then be updated to represent the new piece locations
+    //and the player scores will be updated accordingly.
+    //returns true if the move was valid and successful,
+    //false if the move was invalid
+    public boolean makeMove(Move move) {
         int playerGain = 0;
         int oppLoss = 0;
         PieceColor player = PieceColor.BLUE;
@@ -86,24 +107,36 @@ public class Board {
         }
         int x = move.getX();
         int y = move.getY();
-        pieces[y][x] = player;
+
+        //Check for invalid moves
+        if (move.getMoveType() == MoveType.C_PARA_DROP && pieces[y][x] != PieceColor.BLANK)
+            return false;
+        if (move.getMoveType() == MoveType.M1_DEATH_BLITZ && !canDeathBlitz(x, y, player))
+            return false;
+
+        pieces[y][x] = player; //set this piece to belong to player, no matter which move type
         playerGain += boardVals[y][x];
-        if (move.getMoveType() == MoveType.M1_DEATH_BLITZ) {
+        //Check for pieces to conquer if this is death blitz attack
+        if (move.getMoveType() == MoveType.M1_DEATH_BLITZ) { 
+            //Check up for opponent piece to conquer
             if (y - 1 >= 0 && pieces[y-1][x] == opp) {
                 pieces[y-1][x] = player;
                 playerGain += boardVals[y-1][x];
                 oppLoss += boardVals[y-1][x];
             }
+            //Check down for opponent piece to conquer
             if (y + 1 < pieces.length && pieces[y+1][x] == opp) {
                 pieces[y+1][x] = player;
                 playerGain += boardVals[y+1][x];
                 oppLoss += boardVals[y+1][x];
             }
+            //Check left for opponent piece to conquer
             if (x - 1 >= 0 && pieces[y][x-1] == opp) {
                 pieces[y][x-1] = player;
                 playerGain += boardVals[y][x-1];
                 oppLoss += boardVals[y][x-1];
             }
+            //Check right for opponent piece to conquer
             if (x + 1 < pieces[y].length && pieces[y][x+1] == opp) {
                 pieces[y][x+1] = player;
                 playerGain += boardVals[y][x+1];
@@ -118,8 +151,44 @@ public class Board {
             greenScore += playerGain;
             blueScore -= oppLoss;
         }
+        return true;
     }
 
+    //Checks if the game is over
+    //if the game is over and no more moves can be made, return true
+    //if there are still moves that can be made, return false
+    public boolean gameOver() {
+        return emptySpaces == 0;
+    }
+
+    //Return the score of the blue player
+    public int getBlueScore() {
+        return blueScore;
+    }
+
+    //Return the score of the green player
+    public int getGreenScore() {
+        return greenScore;
+    }
+
+    //Return the score of the specified color player
+    public int getScore(PieceColor color) {
+        return (color == PieceColor.BLUE)? blueScore : greenScore;
+    }
+
+    //Returns the color of the winner
+    //or blank if it was a tie
+    public PieceColor getWinner() {
+        if (blueScore > greenScore)
+            return PieceColor.BLUE;
+        else if (blueScore < greenScore)
+            return PieceColor.GREEN;
+        else return PieceColor.BLANK;
+    }
+
+    //private function that calculates if the specified player color can
+    //death blitz at the specified coordinates
+    //(Note: pieces is indexed by [y][x])
     private boolean canDeathBlitz(int x, int y, PieceColor playerColor) {
         if (pieces[y][x] == PieceColor.BLANK) {
             if (y - 1 >= 0 && pieces[y-1][x] == playerColor)
