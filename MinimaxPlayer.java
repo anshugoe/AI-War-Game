@@ -20,10 +20,10 @@ public class MinimaxPlayer implements Player {
     }
 
     public Move decideMove() {
-        int currentHigh = Integer.MIN_VALUE;
-        Move highScoreMove = null;
-
         LinkedList<Move> moves = board.getPossibleMoves(color);
+        int currentHigh = Integer.MIN_VALUE;
+        Move highScoreMove = moves.getFirst();
+
         for (Move m : moves) {
             Board child = board.copy();
             if (child.makeMove(m)) {

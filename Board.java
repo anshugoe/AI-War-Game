@@ -133,6 +133,7 @@ public class Board {
 
         pieces[y][x] = player; //set this piece to belong to player, no matter which move type
         playerGain += boardVals[y][x];
+        emptySpaces--; //reduce counter of empty spaces
         //Check for pieces to conquer if this is death blitz attack
         if (move.getMoveType() == MoveType.M1_DEATH_BLITZ) { 
             //Check up for opponent piece to conquer
@@ -209,6 +210,22 @@ public class Board {
         else if (blueScore < greenScore)
             return PieceColor.GREEN;
         else return PieceColor.BLANK;
+    }
+
+    public String toString() {
+        String result = "";
+        for (int i = 0; i < pieces.length; i++) {
+            for (int j = 0; j < pieces[i].length; j++) {
+                if (pieces[i][j] == PieceColor.BLUE)
+                    result += "(" + boardVals[i][j] + ")\t";
+                else if (pieces[i][j] == PieceColor.GREEN)
+                    result += "[" + boardVals[i][j] + "]\t";
+                else
+                    result += boardVals[i][j] + "\t";
+            }
+            result += "\n";
+        }
+        return result;
     }
 
     //private function that calculates if the specified player color can

@@ -20,10 +20,14 @@ public class MatchManager {
 
     public void runGame() {
         Player currentTurnPlayer = player1;
+        System.out.println(board);
+        System.out.println("-------------------------------");
         while (!board.gameOver()) {
             Move currentMove = currentTurnPlayer.decideMove();
             board.makeMove(currentMove);
             currentTurnPlayer = (currentTurnPlayer == player1)? player2 : player1;
+            System.out.println(board);
+            System.out.println("-------------------------------");
         }
         PieceColor winner = board.getWinner();
         if (winner == PieceColor.BLUE)
