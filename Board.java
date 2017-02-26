@@ -76,7 +76,48 @@ public class Board {
     }
 
     public void makeMove(Move move) {
-        
+        int playerGain = 0;
+        int oppLoss = 0;
+        PieceColor player = PieceColor.BLUE;
+        PieceColor opp = PieceColor.GREEN;
+        if (move.getPlayerColor() == PieceColor.GREEN) {
+            player = PieceColor.GREEN;
+            opp = PieceColor.BLUE;
+        }
+        int x = move.getX();
+        int y = move.getY();
+        pieces[y][x] = player;
+        playerGain += boardVals[y][x];
+        if (move.getMoveType() == MoveType.M1_DEATH_BLITZ) {
+            if (y - 1 >= 0 && pieces[y-1][x] == opp) {
+                pieces[y-1][x] = player;
+                playerGain += boardVals[y-1][x];
+                oppLoss += boardVals[y-1][x];
+            }
+            if (y + 1 < pieces.length && pieces[y+1][x] == opp) {
+                pieces[y+1][x] = player;
+                playerGain += boardVals[y+1][x];
+                oppLoss += boardVals[y+1][x];
+            }
+            if (x - 1 >= 0 && pieces[y][x-1] == opp) {
+                pieces[y][x-1] = player;
+                playerGain += boardVals[y][x-1];
+                oppLoss += boardVals[y][x-1];
+            }
+            if (x + 1 < pieces[y].length && pieces[y][x+1] == opp) {
+                pieces[y][x+1] = player;
+                playerGain += boardVals[y][x+1];
+                oppLoss += boardVals[y][x+1];
+            }
+        }
+        if (player == PieceColor.BLUE) {
+            blueScore += playerGain;
+            greenScore -= oppLoss;
+        }
+        else {
+            greenScore += playerGain;
+            blueScore -= oppLoss;
+        }
     }
 
     private boolean canDeathBlitz(int x, int y, PieceColor playerColor) {
