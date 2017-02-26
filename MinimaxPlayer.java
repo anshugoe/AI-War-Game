@@ -61,6 +61,10 @@ public class MinimaxPlayer implements Player {
         }
     }
 
+    public PieceColor getColor() {
+        return color;
+    }
+
     private int evaluate(Board b) {
         if (b.gameOver() && b.getWinner() == color)
             return Integer.MAX_VALUE;
@@ -84,6 +88,7 @@ public class MinimaxPlayer implements Player {
     }
 
     //-------Note: won't work well with game boards that have 0s, but we don't have any of those.
+    //Score + total value of all conquerable squares
     private int evaluate2(Board b) {
         if (b.gameOver() && b.getWinner() == color)
             return Integer.MAX_VALUE;

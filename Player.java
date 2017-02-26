@@ -7,4 +7,6 @@ public interface Player {
     
     //Decide on next move, assuming it is this player's turn
     public Move decideMove();
+
+    public PieceColor getColor();
 }
