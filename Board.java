@@ -91,6 +91,23 @@ public class Board {
         return moves;
     }
 
+    //Takes the moves returned from the getPossibleMoves function
+    //And creates a separate child board for each one.
+    //returns all these child boards in a linked list.
+    public LinkedList<Board> getChildBoards(PieceColor playerColor) {
+        LinkedList<Move> moves = getPossibleMoves(playerColor);
+        LinkedList<Board> children = new LinkedList<Board>();
+        for (Move m : moves) {
+            Board child = this.copy();
+            boolean moveSuccess = child.makeMove(m);
+            if (moveSuccess)
+                children.add(child);
+            else
+                child = null;
+        }
+        return children;
+    }
+
     //Performs the actual action of making the specified move on this board.
     //This board will then be updated to represent the new piece locations
     //and the player scores will be updated accordingly.
@@ -174,6 +191,14 @@ public class Board {
     //Return the score of the specified color player
     public int getScore(PieceColor color) {
         return (color == PieceColor.BLUE)? blueScore : greenScore;
+    }
+
+    public PieceColor[][] getPieces() {
+        return pieces;
+    }
+
+    public int[][] getValues() {
+        return boardVals;
     }
 
     //Returns the color of the winner

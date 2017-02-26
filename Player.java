@@ -3,8 +3,8 @@
 //Project 2: War Game
 //February 26, 2017
 
-public abstract class Player {
+public interface Player {
     
-    private Board board;
-    private PieceColor color;
+    //Decide on next move, assuming it is this player's turn
+    public Move decideMove();
 }
