@@ -11,7 +11,7 @@ public class Board {
     private PieceColor[][] pieces; //colors of pieces currently on board; indexed by [y][x]
     private int blueScore;
     private int greenScore;
-    private int emptySpaces;
+    private int emptySpaces; //keep track of how many empty spaces are left.
 
     //Constructor which allows values to be set
     //Sets all pieces to BLANK for a new game
@@ -194,10 +194,12 @@ public class Board {
         return (color == PieceColor.BLUE)? blueScore : greenScore;
     }
 
+    //Get the 2d-array of colored pieces
     public PieceColor[][] getPieces() {
         return pieces;
     }
 
+    //get the 2d-array of square values
     public int[][] getValues() {
         return boardVals;
     }
@@ -212,6 +214,7 @@ public class Board {
         else return PieceColor.BLANK;
     }
 
+    //Returns a string containing a textual representation of this board
     public String toString() {
         String result = "";
         for (int i = 0; i < pieces.length; i++) {
