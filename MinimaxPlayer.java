@@ -11,16 +11,21 @@ public class MinimaxPlayer implements Player {
     PieceColor color;
     PieceColor opponentColor;
     int minimaxDepth;
+    int nodesExamined;
+    int movesMade;
 
     public MinimaxPlayer(Board board, PieceColor color, int minimaxDepth) {
         this.board = board;
         this.color = color;
         opponentColor = (color == PieceColor.BLUE)? PieceColor.GREEN : PieceColor.BLUE;
         this.minimaxDepth = minimaxDepth;
+        nodesExamined = 0;
+        movesMade = 0;
     }
 
     public Move decideMove() {
         LinkedList<Move> moves = board.getPossibleMoves(color);
+        nodesExamined += moves.size();
         int currentHigh = Integer.MIN_VALUE;
         Move highScoreMove = moves.getFirst();
 
@@ -37,6 +42,7 @@ public class MinimaxPlayer implements Player {
             }
         }
         
+        movesMade++;
         return highScoreMove;
     }
 
@@ -45,7 +51,9 @@ public class MinimaxPlayer implements Player {
             return evaluate(b);
         if (maximizing) {
             int bestValue = Integer.MIN_VALUE;
-            for (Board child : b.getChildBoards(color)) {
+            LinkedList<Board> childBoards = b.getChildBoards(color);
+            nodesExamined += childBoards.size();
+            for (Board child : childBoards) {
                 int v = minimax(child, depth - 1, false);
                 bestValue = Math.max(bestValue, v);
             }
@@ -53,7 +61,9 @@ public class MinimaxPlayer implements Player {
         }
         else {
             int bestValue = Integer.MAX_VALUE;
-            for (Board child : b.getChildBoards(opponentColor)) {
+            LinkedList<Board> childBoards = b.getChildBoards(opponentColor);
+            nodesExamined += childBoards.size();
+            for (Board child : childBoards) {
                 int v = minimax(child, depth - 1, true);
                 bestValue = Math.min(bestValue, v);
             }
@@ -63,6 +73,17 @@ public class MinimaxPlayer implements Player {
 
     public PieceColor getColor() {
         return color;
+    }
+
+    public String toString() {
+        String result = "Type: Minimax Player ";
+        result += "(Evaluation function: score of player; depth: " + minimaxDepth + ")\n";
+        result += "Number of moves: " + movesMade + "\n";
+        result += "Nodes examined: " + nodesExamined + "\n";
+        result += "Average nodes per move: " + ((float)nodesExamined / movesMade) + "\n";
+        result += "Average time to make a move: \n";
+        result += "Score: " + board.getScore(color);
+        return result;
     }
 
     private int evaluate(Board b) {
@@ -87,7 +108,6 @@ public class MinimaxPlayer implements Player {
         return b.getScore(color) - b.getScore(opponentColor);
     }
 
-    //-------Note: won't work well with game boards that have 0s, but we don't have any of those.
     //Score + total value of all conquerable squares
     private int evaluate2(Board b) {
         if (b.gameOver() && b.getWinner() == color)

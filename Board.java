@@ -219,12 +219,13 @@ public class Board {
                 if (pieces[i][j] == PieceColor.BLUE)
                     result += "(" + boardVals[i][j] + ")\t";
                 else if (pieces[i][j] == PieceColor.GREEN)
-                    result += "[" + boardVals[i][j] + "]\t";
+                    result += "<" + boardVals[i][j] + ">\t";
                 else
                     result += boardVals[i][j] + "\t";
             }
             result += "\n";
         }
+        result += "(#) = Blue; <#> = Green; # = Blank";
         return result;
     }
 

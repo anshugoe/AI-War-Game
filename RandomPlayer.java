@@ -24,4 +24,14 @@ public class RandomPlayer implements Player {
     public PieceColor getColor() {
         return color;
     }
+
+    public String toString() {
+        String result = "Type: Random player\n";
+        result += "Number of moves: \n";
+        result += "Nodes examined: \n";
+        result += "Average nodes per move: \n";
+        result += "Average time to make a move: \n";
+        result += "Score: " + board.getScore(color); 
+        return result;
+    }
 }
