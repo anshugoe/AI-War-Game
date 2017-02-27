@@ -5,8 +5,8 @@
 
 import java.util.LinkedList;
 
-//Contains logic for player using the minimax algorithm
-public class MinimaxPlayer extends Player {
+//Contains logic for player using the alpha-beta pruned minimax algorithm
+public class AlphaBetaPlayer extends Player {
 
     private Board board;
     private PieceColor color; //this player's color
@@ -16,7 +16,7 @@ public class MinimaxPlayer extends Player {
 
     //Constructor takes arguments for the game board, color this player will be,
     //and how deep the minimax algorithm should go
-    public MinimaxPlayer(Board board, PieceColor color, int minimaxDepth) {
+    public AlphaBetaPlayer(Board board, PieceColor color, int minimaxDepth) {
         this.board = board;
         this.color = color;
         opponentColor = (color == PieceColor.BLUE)? PieceColor.GREEN : PieceColor.BLUE;
@@ -39,7 +39,7 @@ public class MinimaxPlayer extends Player {
             if (child.makeMove(m)) {
                 //using false here because this method (decideMove) technically counts as the
                 //first level, which maximizes the result. So the next step is to minimize.
-                int moveScore = minimax(child, minimaxDepth - 1, false);
+                int moveScore = alphabeta(child, minimaxDepth - 1, Integer.MIN_VALUE, Integer.MAX_VALUE, false);
                 if (moveScore > currentHigh) {
                     currentHigh = moveScore;
                     highScoreMove = m;
@@ -51,28 +51,30 @@ public class MinimaxPlayer extends Player {
     }
 
     //Performs the minimax algorithm on the board for this player
-    public int minimax(Board b, int depth, boolean maximizing) {
+    public int alphabeta(Board b, int depth, int a, int beta, boolean maximizing) {
         if (depth == 0 || b.gameOver())
             return evaluate(b);
         if (maximizing) { //if this is a maximizing iteration, maximize everything
-            int bestValue = Integer.MIN_VALUE;
+            int v = Integer.MIN_VALUE;
             LinkedList<Board> childBoards = b.getChildBoards(color);
             nodesExamined += childBoards.size();
             for (Board child : childBoards) {
-                int v = minimax(child, depth - 1, false); //next iteration will minimize
-                bestValue = Math.max(bestValue, v);
+                v = Math.max(v, alphabeta(child, depth - 1, a, beta, false)); 
+                if (v >= beta) return v;
+                a = Math.max(a, v);
             }
-            return bestValue;
+            return v;
         }
         else { //if this is not a maximizing iteration, minimize everything
-            int bestValue = Integer.MAX_VALUE;
+            int v = Integer.MAX_VALUE;
             LinkedList<Board> childBoards = b.getChildBoards(opponentColor);
             nodesExamined += childBoards.size();
             for (Board child : childBoards) {
-                int v = minimax(child, depth - 1, true); //next iteration will maximize
-                bestValue = Math.min(bestValue, v);
+                v = Math.min(v, alphabeta(child, depth - 1, a, beta, true));
+                if (v <= a) return v;
+                beta = Math.min(beta, v);
             }
-            return bestValue;
+            return v;
         }
     }
 
@@ -83,7 +85,7 @@ public class MinimaxPlayer extends Player {
 
     //Returns string containing stats and data about this player
     public String toString() {
-        String result = "Type: Minimax Player ";
+        String result = "Type: AlphaBeta pruned Minimax Player ";
         result += "(Evaluator: total value of captured squares; depth: " + minimaxDepth + ")\n";
         result += "Number of moves: " + movesMade + "\n";
         result += "Nodes examined: " + nodesExamined + "\n";

@@ -22,18 +22,60 @@ public class Driver {
 
         //Create new board from those values
         Board b = new Board(boardVals);
-        //Create player objects according to arguments
-        Player player1 = getPlayer(args[1], b, PieceColor.BLUE);
-        Player player2 = getPlayer(args[2], b, PieceColor.GREEN);
-        //Check that the player type is valid
-        if (player1 == null || player2 == null) {
-            System.err.println("Unknown player type. Types include R, MM, AB.");
-            System.exit(1);
+
+        if (args.length >= 4 && args[3].equalsIgnoreCase("multi")) {
+            multiRun(b, args[1], args[2]);
         }
-        //Play the game and print the results.
-        MatchManager mm = new MatchManager(b, player1, player2);
-        mm.runGame();
-        System.out.println(mm.getStats());
+        else {
+        
+            //Create player objects according to arguments
+            Player player1 = getPlayer(args[1], b, PieceColor.BLUE);
+            Player player2 = getPlayer(args[2], b, PieceColor.GREEN);
+            //Check that the player type is valid
+            if (player1 == null || player2 == null) {
+                System.err.println("Unknown player type. Types include R, MM, AB.");
+                System.exit(1);
+            }
+            //Play the game and print the results.
+            MatchManager mm = new MatchManager(b, player1, player2);
+            mm.runGame();
+            System.out.println(mm.getStats());
+        }
+    }
+
+    //This function allows multiple runs of games during the same session
+    //The stats from these games are averaged together.
+    public static void multiRun(Board origb, String player1type, String player2type) {
+        int totalBlueScore = 0;
+        int totalGreenScore = 0;
+        double totalBlueMoveTime = 0;
+        double totalGreenMoveTime = 0; //variables to save stats in
+        System.out.print("Running... ");
+        for (int i = 0; i < 50; i++) {
+            Board b = origb.copy();
+            Player player1 = getPlayer(player1type, b, PieceColor.BLUE);
+            Player player2 = getPlayer(player2type, b, PieceColor.GREEN);
+            //Check that the player type is valid
+            if (player1 == null || player2 == null) {
+                System.err.println("Unknown player type. Types include R, MM, AB.");
+                System.exit(1);
+            }
+
+            //Run the game
+            MatchManager mm = new MatchManager(b, player1, player2);
+            mm.runGame();
+            totalBlueScore += player1.getScore();
+            totalGreenScore += player2.getScore();
+            totalBlueMoveTime += player1.getAvgMoveTime();
+            totalGreenMoveTime += player2.getAvgMoveTime();
+        }
+        //Print the results
+        System.out.println();
+        System.out.println("Avg blue score: " + (totalBlueScore / 50));
+        System.out.println("Avg green score: " + (totalGreenScore / 50));
+        System.out.println("Avg avg blue time: " + (totalBlueMoveTime / 50));
+        System.out.println("Avg avg green time: " + (totalGreenMoveTime / 50));
+
     }
 
     //Get a player object according to what the argument is
@@ -43,7 +85,7 @@ public class Driver {
         else if (arg.equalsIgnoreCase("mm")) //Minimax Player
             return new MinimaxPlayer(b, color, 4);
         else if (arg.equalsIgnoreCase("ab")) // AlphaBeta Player
-            return null;
+            return new AlphaBetaPlayer(b, color, 5);
         else return null;
     }
 
